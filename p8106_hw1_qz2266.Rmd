@@ -6,3 +6,29 @@ output: github_document
 ---
 
 
+```{r setup, include=FALSE}
+library(tidyverse)
+library(dplyr) 
+library(glmnet)
+library(caret)
+library(corrplot)
+library(plotmo)
+
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+### Data Import
+In this exercise, we predict the sale price of a house using its other characteristics. The
+training data are in “housing train.csv”, and the test data are in “housing test.csv”.
+```{r}
+# read in training data
+train = read.csv("data/housing_training.csv") %>% 
+janitor::clean_names()
+train = na.omit(train)
+
+# read in test data
+test = read.csv("data/housing_test.csv") %>% 
+janitor::clean_names()
+test = na.omit(test)
+```
+
