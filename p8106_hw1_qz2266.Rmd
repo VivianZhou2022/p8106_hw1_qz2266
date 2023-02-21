@@ -17,7 +17,7 @@ library(plotmo)
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
-### Data Import
+### Data Import and cleaning
 In this exercise, we predict the sale price of a house using its other characteristics. The
 training data are in “housing train.csv”, and the test data are in “housing test.csv”.
 ```{r}
@@ -30,5 +30,51 @@ train = na.omit(train)
 test = read.csv("data/housing_test.csv") %>% 
 janitor::clean_names()
 test = na.omit(test)
+
+# create covariates matrix for training and test
+x_train = model.matrix(sale_price ~ ., train)[,-1]
+y_train = train$sale_price
+x_test <- model.matrix(sale_price ~ ., test)[ ,-1]
+y_test <- test$sale_price
 ```
+
+### Fit a linear model using least squares
+```{r}
+set.seed(1234)
+
+lm_fit = lm(sale_price ~ ., 
+            data = train,
+            method = "lm",
+            trControl = trainControl(method = "repeatedcv", number = 10, repeats = 5))
+summary(lm_fit)
+```
+
+
+### Fit a lasso model
+
+#### using glmnet
+```{r}
+set.seed(1234)
+
+lasso_fit = cv.glmnet(
+x = x_train,
+y = y_train,
+alpha = 1,
+lambda = exp(seq(8, -5, length = 100))
+)
+
+plot(lasso_fit)
+
+# Look at the 1SE coefficient for lasso
+predict(lasso_fit, s = lasso_fit$lambda.1se,type = "coefficients")
+```
+
+```{r}
+y_pred <- predict(lasso_fit, newx = x_test, s = "lambda.min", type = "response")
+lasso_mse <- mean(RMSE(y_pred, y_test)^2); lasso_mse
+```
+The test MSE for Lasso model (1SE) is `r lasso_mse`.
+
+### Elastic Net model
+
 
