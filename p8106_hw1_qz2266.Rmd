@@ -18,6 +18,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
 
+
 ### Data Import and cleaning
 
 In this exercise, we predict the sale price of a house using its other characteristics. The training data are in “housing train.csv”, and the test data are in “housing test.csv”.
@@ -65,12 +66,10 @@ pred_lm = predict(lm_fit, newdata = test)
 # test error
 
 
-
 lm_rmse = RMSE(pred_lm, test$sale_price); lm_rmse
 mse = (lm_rmse^2); mse
 ```
-Pros and cons of the linear model: 1. This model is quite straightforward and easy to fit.The estimates are BLUE. However, this model is still complicated with too many predictors. Moreover, there are multicollinearity issue and overfitting problem. 
-
+Pros and cons of the linear model: 1. This model is quite straightforward and easy to fit.The estimates are BLUE. However, this model is still quite complicated with too many predictors. Moreover, there is potential multicollinearity issue and overfitting problem. 
 
 
 
@@ -130,6 +129,60 @@ sum(num_coef_1se != 0) - 1
 ```
 
 There are 37 predictors in lasso model 1 based on lambda min and 36 predictors in lasso model 2 based on 1se rule.  The selected turing parameter for lowest cv rmse is 64.18 while the 1se rule gives lambda of 395.36. Lasso model 2 based on 1se rule has smaller test MSE which is `r lasso_1se_mse` than lasso model 1 based on lambda min which is `r lasso_mse`. Therefore, lasso model 2 based on 1se is better.
+
+
+
+### c). Elastic Net model
+
+#### Elastice net model 1
+```{r}
+set.seed(1)
+
+elnet_fit = train(x_train, y_train, 
+                  method = "glmnet",
+                  tuneGrid = expand.grid(alpha = seq(0, 1, length = 21),
+                                         lambda = exp(seq(-2, 8, length = 50))),
+                  trControl = trainControl(method = "repeatedcv", number = 10, repeats = 5))
+
+# visualization
+myCol <- rainbow(25)
+myPar <- list(superpose.symbol = list(col = myCol),
+superpose.line = list(col = myCol))
+plot(elnet_fit, par.settings = myPar)
+
+# tuning parameter 
+elnet_fit$bestTune
+# show coefficients
+coef(elnet_fit$finalModel, elnet_fit$bestTune$lambda)
+```
+
+```{r}
+# prediction
+pred_elnet = predict(elnet_fit, newdata = x_test)
+# test error
+elnet_mse = mean(RMSE(pred_elnet, y_test)^2); elnet_mse
+
+```
+
+#### Elastic net model 2 based on 1se
+```{r}
+set.seed(1)
+# try to fit elastic net model applying 1se rule to select tuning parameters
+elnet_model_1se = train(x_train, y_train, 
+                    method = "glmnet",
+                    tuneGrid = expand.grid(alpha = seq(0, 1, length = 21),
+                                           lambda = exp(seq(-2, 8, length = 50))),
+                    trControl =  trainControl(method = "repeatedcv", selectionFunction = "oneSE", number = 10, repeats = 5))
+
+# tuning parameters
+elnet_model_1se$bestTune
+# show coefficients 
+coef(elnet_model_1se$finalModel, elnet_model_1se$bestTune$lambda)
+```
+The selected tuning parameters of elastic net model 1 is alpha = 0.05 and lambda = 582.5 and test error is `r elnet_mse`.  If 1se rule is applied to elastic net model, the tuning parameters is alpha =  0 and lambda is 2980.96. 
+As we know, elastic net allows us to tune the alpha parameter where 𝞪 = 0 corresponds to ridge and 𝞪 = 1 to lasso. That means we can choose an alpha value between 0 and 1 to optimize the elastic net. In elastic net model 2, we found alpha = 0. Therefore, the penalty function reduces to the ridge term. Thus, we don't need to apply 1se rule to select tuning parameters in this elastic net model. It doesn't help to optimize this model. 
+
+
 
 
 
