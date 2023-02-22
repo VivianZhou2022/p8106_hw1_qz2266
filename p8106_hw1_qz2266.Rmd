@@ -17,9 +17,10 @@ library(plotmo)
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
+
 ### Data Import and cleaning
-In this exercise, we predict the sale price of a house using its other characteristics. The
-training data are in “housing train.csv”, and the test data are in “housing test.csv”.
+
+In this exercise, we predict the sale price of a house using its other characteristics. The training data are in “housing train.csv”, and the test data are in “housing test.csv”.
 ```{r}
 # read in training data
 train = read.csv("data/housing_training.csv") %>% 
@@ -38,43 +39,30 @@ x_test <- model.matrix(sale_price ~ ., test)[ ,-1]
 y_test <- test$sale_price
 ```
 
-### Fit a linear model using least squares
+
+Check for potential collinearities between predictors in training data
+```{r correlation plot}
+# Correlation plot for all predictors
+corrplot(cor(x_train), method = "circle", type = "full", tl.cex = 0.5)
+```
+From the correlation plot we can see there are high correlations between some of the covariates. This high correlation might cause collinearity issue. To fix the potential multicollinearit issue, regularization methods such as lasso, elastic net, or partial least squares could be employed, other than linear model. 
+
+
+
+### a). Linear model 
 ```{r}
-set.seed(1234)
+set.seed(1)
 
 lm_fit = lm(sale_price ~ ., 
             data = train,
             method = "lm",
             trControl = trainControl(method = "repeatedcv", number = 10, repeats = 5))
 summary(lm_fit)
+
+pred_lm = predict(lm_fit, newdata = test)
+lm_mse = RMSE(pred_lm, test$sale_price); lm_mse
 ```
 
 
-### Fit a lasso model
-
-#### using glmnet
-```{r}
-set.seed(1234)
-
-lasso_fit = cv.glmnet(
-x = x_train,
-y = y_train,
-alpha = 1,
-lambda = exp(seq(8, -5, length = 100))
-)
-
-plot(lasso_fit)
-
-# Look at the 1SE coefficient for lasso
-predict(lasso_fit, s = lasso_fit$lambda.1se,type = "coefficients")
-```
-
-```{r}
-y_pred <- predict(lasso_fit, newx = x_test, s = "lambda.min", type = "response")
-lasso_mse <- mean(RMSE(y_pred, y_test)^2); lasso_mse
-```
-The test MSE for Lasso model (1SE) is `r lasso_mse`.
-
-### Elastic Net model
 
 
