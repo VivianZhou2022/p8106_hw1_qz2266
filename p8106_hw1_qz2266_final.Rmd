@@ -196,7 +196,7 @@ elnet_mse_1se = mean(RMSE(pred_elnet_1se, y_test)^2); elnet_mse_1se
 ```
 - The selected tuning parameters of elastic net model 1 is alpha = 0.05 and lambda = 582.5 and test error is `r elnet_mse`.  If 1se rule is applied to elastic net model, the tuning parameters is alpha =  0 and lambda is 2980.96, and test error is `r elnet_mse_1se` . 
 
-- As we know, elastic net allows us to tune the alpha parameter where 𝞪 = 0 corresponds to ridge and 𝞪 = 1 to lasso. That means we can choose an alpha value between 0 and 1 to optimize the elastic net. In elastic net model 2, we found alpha = 0. Therefore, the penalty function reduces to the ridge term. Thus, we don't need to apply 1se rule to select tuning parameters in this elastic net model. It doesn't help to optimize this model. 
+- As we know, elastic net allows us to tune the alpha parameter where alpha = 0 corresponds to ridge and alpha = 1 to lasso. That means we can choose an alpha value between 0 and 1 to optimize the elastic net. In elastic net model 2, we found alpha = 0. Therefore, the penalty function reduces to the ridge term. Thus, we don't need to apply 1se rule to select tuning parameters in this elastic net model. It doesn't help to optimize this model. 
 
 
 ### d). Partial least squares model
