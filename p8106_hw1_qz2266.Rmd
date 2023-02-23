@@ -52,23 +52,23 @@ corrplot(cor(x_train), method = "circle", type = "full", tl.cex = 0.5)
 
 
 ### a). Linear model 
+
 ```{r}
 set.seed(1)
-
-lm_fit = lm(sale_price ~ ., 
-            data = train,
-            method = "lm",
-            trControl = trainControl(method = "repeatedcv", number = 10, repeats = 5))
-summary(lm_fit)
+lm.fit <- train(x_train, y_train, 
+             method = "lm",
+             trControl = trainControl(method = "repeatedcv", number = 10, repeats = 5))
+summary(lm.fit)
 
 # prediction
-pred_lm = predict(lm_fit, newdata = test)
+pred.lm = predict(lm.fit, newdata = x_test)
 # test error
-lm_rmse = RMSE(pred_lm, test$sale_price); lm_rmse
-lm_mse = (lm_rmse^2); lm_mse
+lm.rmse = RMSE(pred.lm, test$sale_price); lm.rmse
+lm.mse = (lm.rmse^2); lm.mse
 ```
+
 Pros and cons of the linear model:  
-- This model is quite straightforward and easy to fit.The estimates are BLUE.The mean-square test error (MSE) for this model is `r lm_mse`.
+- This model is quite straightforward and easy to fit.The estimates are BLUE.The mean-square test error (MSE) for this model is `r lm.mse`.
 - However, this model is still quite complicated with too many predictors. Moreover, there is multicollinearity issue and potential overfitting problem. 
 
 
@@ -210,8 +210,23 @@ pls_pred = predict(pls_fit, newdata = x_test)
 # test error
 pls_mse = mean((pls_pred - y_test)^2); pls_mse
 ```
-From the summary of this partial least squares model we can find the number of components is 12. The test error is `r pls_mse`.
+From the summary of this partial least squares model we found the number of components is 12. The test error is `r pls_mse`.
 
 
+#### Model comparison
 
+```{r compare}
+set.seed(1)
+
+# compare four models
+resamp <- resamples(list(least_square = lm.fit, lasso = lasso_1se, elastic_net = elnet_fit, pls = pls_fit))
+summary(resamp)
+```
+
+```{r boxplot}
+# make a boxplot to show RMSE of 4 models
+bwplot(resamp, metric = "RMSE")
+```
+
+.
 
