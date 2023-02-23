@@ -1,10 +1,12 @@
 ---
-title: "p8106_hw1_qz2266"
+title: "p8106_hw1_qz2266_final"
 author: "Qing Zhou"
 output:
-  pdf_document:
-    toc: true
-    number_sections: true
+  pdf_document: 
+    toc: yes
+    number_sections: yes
+    fig_width: 3
+    fig_crop: no
 ---
 
 
