@@ -1,8 +1,10 @@
 ---
 title: "p8106_hw1_qz2266"
 author: "Qing Zhou"
-date: "2023-02-21"
-output: pdf_document
+output:
+  pdf_document:
+    toc: true
+    number_sections: true
 ---
 
 
